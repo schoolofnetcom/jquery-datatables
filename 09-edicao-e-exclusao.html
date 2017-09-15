@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+</head>
+<body>
+<form action="">
+    <label for="nome">Nome</label>
+    <input type="text" name="nome" id="nome">
+    <br/>
+    <label for="cep">Cep</label>
+    <input type="text" name="cep" id="cep">
+    <br/>
+    <label for="logradouro">Logradouro</label>
+    <input type="text" name="logradouro" id="logradouro">
+    <br/>
+    <label for="cidade">Cidade</label>
+    <input type="text" name="cidade" id="cidade">
+    <br/>
+    <label for="estado">Estado</label>
+    <input type="text" name="estado" id="estado">
+    <br/>
+    <button type="submit">Enviar</button>
+</form>
+<table id="my-table" class="display"></table>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var datatable = $('#my-table').DataTable({ //dataTable também funcionar
+            ajax: 'http://localhost:3000/data.json',
+            stateSave: true,
+            columns: [
+                {title: 'Nome', data: 'Nome'},
+                {title: 'CEP', data: 'CEP'},
+                {title: 'Logradouro', data: 'Logradouro'},
+                {title: 'Cidade', data: 'Cidade'},
+                {title: 'Estado', data: 'Estado', defaultContent: '<strong>sem estado</strong>'},
+                {
+                    title: 'Ações',
+                    data: null,
+                    createdCell: function(td,cellData,rowData,row,col){
+                        $(td).html('<a href="javascript:void(0)">Editar</a> | <a href="javascript:void(0)">Excluir</a>');
+                    }
+                },
+            ],
+            drawCallback: function(){
+                $('a').unbind('click');
+                $('#my-table>tbody>tr>td:last-child>a:first-child').click(function(){
+                    var tr = $(this).closest('tr');
+                    var row = datatable.row(tr).data();
+                    $('[name=nome]').val(row.Nome);
+                    $('[name=cep]').val(row.CEP);
+                    $('[name=logradouro]').val(row.Logradouro);
+                    $('[name=cidade]').val(row.Cidade);
+                    $('[name=estado]').val(row.Estado);
+                    $('form').data('row-edit',datatable.row(tr).index());
+                });
+                $('#my-table>tbody>tr>td:last-child>a:last-child').click(function(){
+                    if(confirm('Deseja excluir este registro?')){
+                        var tr = $(this).closest('tr');
+                        datatable.row(tr).remove().draw();
+                    }
+                });
+            }
+        });
+
+        $('form').submit(function(e){
+            e.preventDefault();
+            var rowIndex = $('form').data('row-edit');
+            if(rowIndex){
+                datatable.row(rowIndex).data({
+                    Nome: $('[name=nome]').val(),
+                    CEP: $('[name=cep]').val(),
+                    Logradouro: $('[name=logradouro]').val(),
+                    Cidade: $('[name=cidade]').val(),
+                    Estado: $('[name=estado]').val(),
+                }).draw();
+                return;
+            }
+            var dtRow = datatable.row;
+            var rowAdd = dtRow.add({
+                Nome: $('[name=nome]').val(),
+                CEP: $('[name=cep]').val(),
+                Logradouro: $('[name=logradouro]').val(),
+                Cidade: $('[name=cidade]').val(),
+                Estado: $('[name=estado]').val(),
+            }).draw().node();
+            //var rowAdd = datatable.draw().node();
+            $(rowAdd).css('color','green');
+
+            console.log('sucesso');
+        })
+    });
+</script>
+</body>
+</html>

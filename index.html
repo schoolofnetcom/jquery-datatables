@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+</head>
+<body>
+
+<table id="my-table" class="display"></table>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var datatable = $('#my-table').DataTable({ //dataTable também funcionar
+            ajax: {
+                url: 'https://reqres.in/api/users',
+                /*data: {
+                    dado: 1
+                }*/
+                data: function (data) {
+                    var pageInfo = $('#my-table').DataTable().page.info();
+                    console.log(pageInfo);
+                    return $.extend({}, data, {page: pageInfo.page + 1});
+                },
+                dataSrc: function (json) {
+                    console.log(json);
+                    json.recordsTotal = json.total;
+                    json.recordsFiltered = json.total;
+                    return json.data;
+                }
+            },
+            serverSide: true,
+            //stateSave: true,
+            pageLength: 3,
+            lengthChange: false,
+            //lengthMenu: [[20, 50, 100, -1], ["Pouco", "Médio", "Muito", "Todos"]],
+            columns: [
+                {title: 'ID', data: 'id'},
+                {title: 'Primeiro Nome', data: 'first_name'},
+                {title: 'Último Nome', data: 'last_name'},
+                {title: 'Avatar', data: 'avatar'},
+            ]
+        });
+    });
+</script>
+</body>
+</html>
